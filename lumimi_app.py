@@ -114,32 +114,43 @@ elif menu == "🔥 황금 키워드 & WP 전략":
     if st.button("🔥 WP 설계도 추출"):
         st.code(f"너는 WP 블로거 '루미미'야. [{wp_target}] 주제로 고단가 SEO 포스팅 써줘. 표 포함.", language="markdown")
 
-# --- [메뉴 3] 수익 분석 (이중 그래프 복구 및 고정) ---
+# --- [메뉴 3] 수익 분석 (초정밀 솔루션 강화) ---
 elif menu == "📈 수익 분석 & 시뮬레이션":
-    st.markdown("<div class='section-title'>📊 정밀 수익 진단</div>", unsafe_allow_html=True)
-    
+    st.subheader("📊 루미미 비서의 초정밀 수익 진단")
     with st.expander("🎯 데이터 입력", expanded=True):
-        goal_rev = st.number_input("일일 목표 ($)", value=10.0)
-        rev_list = [st.number_input(f"{(datetime.now()-timedelta(days=7-i)).strftime('%m/%d')}", value=1.5, key=f"r{i}") for i in range(7)]
-    
-    daily_pv = st.number_input("어제 PV", value=100)
-    daily_ctr = st.number_input("어제 CTR (%)", value=1.0)
+        goal_rev = st.number_input("목표 ($)", value=10.0)
+        revs = [st.number_input(f"{(datetime.now()-timedelta(days=7-i)).strftime('%m/%d')}", value=1.0, key=f"v34_{i}") for i in range(7)]
+    pv = st.number_input("어제 PV", value=100)
+    ctr = st.number_input("어제 CTR (%)", value=1.0)
 
-    if st.button("🧐 통합 분석 시작", use_container_width=True):
-        # 📊 그래프 1: 7일 추세
-        chart_df = pd.DataFrame({'날짜': [(datetime.now()-timedelta(days=7-i)).strftime('%m/%d') for i in range(7)], '수익($)': rev_list}).set_index('날짜')
-        st.markdown("#### 📉 최근 7일 수익 흐름")
-        st.area_chart(chart_df)
+    if st.button("🧐 초정밀 솔루션 리포트 보기", use_container_width=True):
+        daily_rev = revs[-1]; clicks = pv*(ctr/100); cpc = daily_rev/clicks if clicks>0 else 0
+        st.area_chart(pd.DataFrame({'날짜': [(datetime.now()-timedelta(days=7-i)).strftime('%m/%d') for i in range(7)], '수익': revs}).set_index('날짜'))
         
-        # 📊 그래프 2: 시뮬레이션
-        daily_rev = rev_list[-1]
-        clicks = daily_pv * (daily_ctr / 100)
-        cpc = daily_rev / clicks if clicks > 0 else 0
+        st.markdown("### 🚀 루미미 비서의 액션 플랜")
         
-        if cpc > 0:
-            req_pv = goal_rev / ((daily_ctr/100) * cpc)
-            st.markdown(f"<div class='goal-box'>🚩 목표 달성률: {int((daily_rev/goal_rev)*100)}% | 필요 PV: {int(req_pv):,}</div>", unsafe_allow_html=True)
-            pv_steps = sorted([daily_pv, daily_pv*5, int(req_pv), int(req_pv*1.2)])
-            sim_df = pd.DataFrame({'PV': [f"{p:,}" for p in pv_steps], '수익': [p*(daily_ctr/100)*cpc for p in pv_steps], '목표': [goal_rev]*len(pv_steps)}).set_index('PV')
-            st.line_chart(sim_df)
-            if daily_rev >= goal_rev: st.balloons()
+        if cpc < 0.2:
+            st.markdown(f"""<div class='sol-card'>
+                <div class='sol-header'><span class='sol-step'>STEP 1</span> 팩폭: 저단가 늪에 빠짐 (현재 ${cpc:.2f})</div>
+                <div class='sol-content'>지금 쓰는 주제는 광고주들이 돈을 안 써요. 아무리 유입 늘려도 루미미님 몸만 상합니다.</div>
+                <div class='sol-action'>✅ <b>즉시 실행:</b> 내일은 WP 탭에서 '자동차 보험' 혹은 '정부 보조금 자격' 키워드로 전문적인 표가 포함된 글을 발행하세요.</div>
+                <div class='sol-action' style='margin-top:10px; border-left-color: #D63384;'>📢 <b>배포 전략:</b> 해당 글은 스레드 '리빙스퀘어' 계정에 정보성 카드뉴스로 홍보하세요.</div>
+            </div>""", unsafe_allow_html=True)
+            
+        elif ctr < 1.5:
+            st.markdown(f"""<div class='sol-card'>
+                <div class='sol-header'><span class='sol-step'>STEP 1</span> 팩폭: 콘텐츠 매력 부족 (CTR {ctr}%)</div>
+                <div class='sol-content'>사람들은 오는데 클릭을 안 해요. 광고가 본문이랑 따로 놀거나, 글이 너무 빨리 끝난다는 증거!</div>
+                <div class='sol-action'>✅ <b>즉시 실행:</b> 글 중간에 '함께 읽으면 수익 2배 되는 글' 링크를 버튼 형태로 3개 이상 배치하고, 도입부 후킹을 강화하세요.</div>
+            </div>""", unsafe_allow_html=True)
+            
+        elif pv < 500:
+            st.markdown(f"""<div class='sol-card'>
+                <div class='sol-header'><span class='sol-step'>STEP 1</span> 팩폭: 유입 가뭄 상태 ({pv} PV)</div>
+                <div class='sol-content'>수익을 논하기엔 유입이 너무 적어요. 지금은 고단가보다 '이슈 키워드' 낚시가 필요한 시점!</div>
+                <div class='sol-action'>✅ <b>즉시 실행:</b> 오늘 '황금 키워드' 탭의 '오늘' 카테고리 실시간 키워드 3개를 엮어서 네이버 블로그에 포스팅 3개 때리세요.</div>
+            </div>""", unsafe_allow_html=True)
+            
+        else:
+            st.success("✅ 폼 미쳤다! 현재 전략이 완벽합니다.")
+            st.info("💡 **추가 팁:** 현재 주제의 연관 키워드를 '장기' 탭에서 골라 시리즈물로 작성하세요.")
