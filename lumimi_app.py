@@ -2,8 +2,9 @@
 import streamlit as st
 import pandas as pd
 import random
+import re
 
-# 1. 구글 시트 연결 설정
+# 1. 구글 시트 연결 및 기본 설정 (기존 로직 유지)
 SHEET_ID = "1zaERVga9_efXnpNL1mmXNdOrJ3syRctLt6hmeJjVgN8"
 SHEET_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv"
 
@@ -16,94 +17,108 @@ def load_keywords():
     except:
         return pd.DataFrame({'구분': [], '키워드': []})
 
-st.set_page_config(page_title="루미미 전략 센터 v16.5", layout="wide")
+st.set_page_config(page_title="루미미 전략 센터 v18.0", layout="wide")
 
+# CSS 스타일 (루미미 시그니처 컬러)
 st.markdown("""
     <style>
     .keyword-badge { background-color: #E1E9FF; color: #2D63F7; padding: 6px 14px; border-radius: 15px; font-weight: bold; margin-right: 10px; display: inline-block; margin-bottom: 12px; border: 1px solid #D0DFFF; font-size: 14px; }
     .badge-evergreen { background-color: #FFF0F0; color: #FF4B4B; }
     .main-title { font-size: 35px; font-weight: 900; color: #1E1E1E; }
-    .sub-info { background-color: #F8F9FA; padding: 15px; border-radius: 10px; border-left: 5px solid #2D63F7; margin-bottom: 20px; }
+    .mode-info { padding: 10px 20px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; }
+    .info-style { background-color: #E8F4FD; color: #007BFF; border-left: 5px solid #007BFF; }
+    .vibe-style { background-color: #FFF0F5; color: #D63384; border-left: 5px solid #D63384; }
     </style>
     """, unsafe_allow_html=True)
 
-st.markdown("<div class='main-title'>🚀 루미미 AI 전략 센터 v16.5</div>", unsafe_allow_html=True)
+st.markdown("<div class='main-title'>🚀 루미미 AI 전략 센터 v18.0</div>", unsafe_allow_html=True)
 
 menu = st.sidebar.radio("메뉴 선택", ["📰 블로그 완제품 조립", "🔥 오늘의 황금 키워드", "📈 수익 분석 및 전략"])
 
 if menu == "📰 블로그 완제품 조립":
-    st.subheader("🕵️ 네이버 블로그 MZ 스마트 조립기")
-    raw_data = st.text_area("기사 본문이나 상세 정보 입력", height=200, placeholder="여기에 내용을 넣어주세요!")
+    st.subheader("🕵️ 네이버 블로그 AI 스마트 조립기")
+    raw_data = st.text_area("기사 본문이나 키워드를 입력하세요", height=200, placeholder="예: 가족돌봄 청년 지원금 소식 / 화랑대 철도공원 나들이 후기")
     
-    # 힙한 멘트 데이터베이스
-    mz_ment_db = [
-        "진심 폼 미쳤다..", "이거 안 가면 유죄임 (진지)", "완전 갓벽 그 자체 ✨", "비주얼 무엇? 실물 깡패임", 
-        "현생 탈출 지대로 하고 옴 ☁️", "진짜 나만 알고 싶었는데.. 특별히 공개!", "이 분위기 어쩔 거야.. 감성 터짐 🔥",
-        "여기 완전 사진 맛집인 거 다들 알지?", "진심 내돈내산 찐 후기임!", "이거 모르면 진짜 손해라구 🤐"
-    ]
+    # --- 1. AI 주제 분석 및 모드 결정 ---
+    def analyze_content(text):
+        if not text: return "준비", "info-style", "꿀팁"
+        
+        # 키워드 분석 로직
+        is_info = any(word in text for word in ["지원", "복지", "수당", "신청", "정부", "선포", "계획", "자격"])
+        
+        # 메인 키워드 추출 (가장 많이 언급된 명사)
+        words = re.findall(r'[가-힣]{2,6}', text)
+        stop_words = ['서울시', '대하여', '있습니다', '위한', '따라', '합니다']
+        common_words = [w for w in words if len(w) >= 2 and w not in stop_words]
+        main_kw = max(set(common_words), key=common_words.count) if common_words else "정보"
+        
+        if is_info:
+            return "📘 정보형 모드 (신뢰/전문성)", "info-style", main_kw
+        else:
+            return "🌸 감성형 모드 (공감/후킹)", "vibe_style", main_kw
+
+    mode_name, mode_class, main_kw = analyze_content(raw_data)
+    
+    if raw_data:
+        st.markdown(f"<div class='mode-info {mode_class}'>현재 분석 모드: {mode_name} | 감지된 키워드: [{main_kw}]</div>", unsafe_allow_html=True)
 
     col_btn1, col_btn2 = st.columns(2)
     
-   # --- 1. [v16.7] 더블 타겟 제목 생성 (SEO vs 후킹) ---
-    if col_btn1.button("🌟 [전략적] 제목 6종 생성", use_container_width=True):
+    # --- 2. 동적 제목 생성 엔진 ---
+    if col_btn1.button("🌟 [맞춤형] 제목 6종 생성", use_container_width=True):
         if raw_data:
-            # 키워드 추출
-            keyword = raw_data[:10].replace(" ", "").strip()
-            
-            titles = f"""
-### 📈 [SEO 상위노출형] - 검색 유입 타겟
-1. {keyword} 가는법 예약 주차 및 봄나들이 명소 총정리 (2026 최신)
-2. 서울 아이와 가볼만한곳 {keyword} 체험 및 레스토랑 이용 꿀팁
-3. {keyword} 방문 전 필수 체크리스트! 입장료부터 주변 맛집까지
+            if "정보형" in mode_name:
+                titles = f"""
+### 📈 [SEO 상위노출형]
+1. 2026 서울시 {main_kw} 지원금 신청방법 및 대상자 조건 정리 (중위 150%)
+2. {main_kw} 혜택 놓치지 마세요! 월 30만원 자기돌봄비 신청 가이드
+3. 서울 복지포털 {main_kw} 신청 기간 및 필수 제출 서류 안내
 
-### 🔥 [홈판/피드 후킹형] - 클릭 유도 타겟
-1. 와.. 서울에 이런 곳이 있었다고? "{keyword}" 분위기 폼 미쳤다.. 🔥
-2. 제 친동생한테만 알려주려다 공개함🤐 "{keyword}" 안 가면 유죄임 (진심)
-3. 갓생 살기 딱 좋은 "{keyword}" 무드 실화냐? 📸✨ (광고아님)
-            """
+### 💡 [신뢰 후킹형]
+1. "설마 나도 대상?" 서울시 {main_kw} 지원 소식, 루미미가 꼼꼼히 뜯어봤어요 🧐
+2. 제 친동생에게만 알려주고 싶은 {main_kw} 꿀정보, 오늘 다 풉니다!
+3. 복잡한 {main_kw} 정책, N잡러 루미미가 1분 요약해 드려요 📝
+                """
+            else:
+                titles = f"""
+### 📈 [SEO 상위노출형]
+1. 서울 가볼만한곳 {main_kw} 주차 예약 및 봄나들이 코스 추천 (내돈내산)
+2. {main_kw} 사진 찍기 좋은 스팟 명당! 주말 데이트 후기
+
+### ✨ [감성 후킹형]
+1. 와.. 서울에 이런 곳이 있었다고? "{main_kw}" 분위기 폼 미쳤다 🔥
+2. 나만 알고 싶은 비밀 장소 "{main_kw}", 안 가면 유죄임 (진심) 📸✨
+3. 갓벽한 주말을 위한 "{main_kw}" 나들이 후기, 감성 수치 200% 충전 ☁️
+                """
             st.code(titles, language="markdown")
 
-    # --- 2. 스마트 랜덤 설계도 & 힙한 멘트 추천 ---
-    if col_btn2.button("✨ [MZ특화] 랜덤 설계도 뽑기", use_container_width=True):
+    # --- 3. 맞춤형 설계도 생성 ---
+    if col_btn2.button("✨ [맞춤형] 랜덤 설계도 뽑기", use_container_width=True):
         if raw_data:
-            # 주제 감지 (나들이 vs 정보)
-            is_place = any(word in raw_data for word in ["공원", "역", "여행", "카페", "나들이", "기차"])
+            # 모드별 멘트 풀
+            info_ments = ["N잡러 루미미가 이거 먼저 분석해보니 🧐", "신청 기간 얼마 안 남았어요! 지금 안 하면 후회해요 🤐", "솔직히 저도 처음엔 광고인 줄 알았거든요?"]
+            place_ments = ["이 가격에 이 무드 실화니? ✨", "왜 난리인지 나만 몰랐네 📸", "슬픈 하루였는데 내 마음을 풀어주네 ☁️"]
             
-            # 화법 선택
-            vibe_db = ["공감형", "팩트형", "반전/감탄형", "비밀 공유형", "뒤늦은 깨달음", "지인 추천형", "감성 힐링형"]
-            selected_vibes = random.sample(vibe_db, 3)
-            # 힙한 멘트 3개 추천
-            selected_mz_ments = random.sample(mz_ment_db, 3)
+            selected_ments = random.sample(info_ments if "정보형" in mode_name else place_ments, 2)
             
             final_prompt = f"""너는 30대 N잡러 인플루언서 '루미미'야. 
 [데이터]를 분석해서 네이버 블로그 글을 써줘. 
 
-[오늘의 루미미 Vibe 조합]
-- 화법: {', '.join(selected_vibes)}
-- 힙한 멘트 (본문에 자연스럽게 섞어줘): 
-  1. "{selected_mz_ments[0]}"
-  2. "{selected_mz_ments[1]}"
-  3. "{selected_mz_ments[2]}"
+[중요 Vibe 지침]
+- {mode_name} 컨셉에 맞춰서 작성할 것.
+- 정보형일 경우 '똑 부러지는 전문가 언니' 말투로 신뢰감 있게!
+- 감성형일 경우 '친근하고 힙한 언니' 말투로 생생하게!
+- 추천 멘트: "{selected_ments[0]}", "{selected_ments[1]}"를 문맥에 맞게 한 번씩만 사용.
 
 [작성 지침]
-- 도입부는 5줄 이내로 임팩트 있게 시작할 것.
-- 추천된 힙한 멘트들을 문맥에 맞게 한 번씩 툭툭 던지듯 넣어줘. (MZ느낌 뿜뿜!)
-- 기사 내용의 핵심 팩트는 놓치지 말고 포함할 것.
-- 사진 위치 5곳 지정, ** 기호 절대 금지, 해시태그 20개.
-
-[데이터]: {raw_data}"""
+- 도입부는 5줄 이내 핵심 요약.
+- 사진 위치 5곳 지정, ** 기호 금지, 줄바꿈 많이.
+- [데이터]: {raw_data}"""
+            
             st.session_state['prompt_result'] = final_prompt
-            st.session_state['current_vibes'] = selected_vibes
-            st.session_state['current_mz'] = selected_mz_ments
-            st.success("✅ MZ 감성 듬뿍 담긴 설계도 완성!")
+            st.success("✅ 주제 분석 완료! 최적화된 설계도가 준비되었습니다.")
 
     if 'prompt_result' in st.session_state:
-        st.markdown(f"""
-        <div class='sub-info'>
-        <b>💡 오늘의 화법:</b> {', '.join(st.session_state['current_vibes'])}<br>
-        <b>🔥 추천 MZ 멘트:</b> {', '.join(st.session_state['current_mz'])}
-        </div>
-        """, unsafe_allow_html=True)
         st.text_area("클로드 전용 명령어", value=st.session_state['prompt_result'], height=400)
 
 # --- 🔥 탭 2: 황금 키워드 ---
