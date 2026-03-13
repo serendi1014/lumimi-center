@@ -1,10 +1,11 @@
+
 import streamlit as st
 import pandas as pd
 import random
 import re
 from datetime import datetime, timedelta
 
-# 1. 구글 시트 연동 설정
+# 1. 데이터 로드 설정
 SHEET_ID = "1zaERVga9_efXnpNL1mmXNdOrJ3syRctLt6hmeJjVgN8"
 SHEET_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv"
 
@@ -15,10 +16,11 @@ def load_keywords():
         df['키워드'] = df['키워드'].astype(str).str.strip()
         return df
     except:
-        return pd.DataFrame({'구분': [], '키워드': []})
+        # 데이터 로드 실패 시 예시 데이터
+        return pd.DataFrame({'구분': ['오늘', '어제', '장기'], '키워드': ['정부 지원금', '성수 팝업', '재테크']})
 
 # 페이지 설정
-st.set_page_config(page_title="루미미 전략 센터 v25.5", layout="wide")
+st.set_page_config(page_title="루미미 전략 센터 v30.0", layout="wide")
 
 # --- ✨ 루미미 프리미엄 CSS 테마 ---
 st.markdown("""
@@ -26,18 +28,20 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700;900&display=swap');
     * { font-family: 'Pretendard', sans-serif; }
     .main-title { font-size: 42px; font-weight: 900; background: linear-gradient(120deg, #2D63F7, #D63384); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 30px; }
-    .keyword-badge { background: #F0F4FF; color: #2D63F7; padding: 8px 16px; border-radius: 20px; font-weight: 700; margin: 5px; display: inline-block; border: 1px solid #E1E9FF; }
-    .badge-wp { background: #FFF0F0; color: #FF4B4B; border: 1px solid #FFDCDC; font-weight: 900; }
-    .wp-box { background: #FFF5F5; border: 1px solid #FFDCDC; padding: 20px; border-radius: 15px; margin-top: 10px; }
-    .section-title { font-size: 22px; font-weight: 800; color: #333; margin-top: 35px; margin-bottom: 18px; border-left: 5px solid #2D63F7; padding-left: 10px; }
+    .keyword-badge { background: #F0F4FF; color: #2D63F7; padding: 8px 16px; border-radius: 20px; font-weight: 700; margin: 5px; display: inline-block; border: 1px solid #E1E9FF; font-size: 14px; }
+    .badge-yesterday { background: #F8F9FA; color: #666; border-color: #EEE; }
+    .badge-evergreen { background: #FFF0F5; color: #D63384; border-color: #FFE1ED; }
+    .recommend-box { background: linear-gradient(135deg, #FFF9E1 0%, #FFF3B0 100%); padding: 20px; border-radius: 15px; border: 1px solid #FFD700; color: #856404; font-weight: 800; margin-bottom: 25px; }
+    .section-title { font-size: 22px; font-weight: 800; color: #333; margin-top: 30px; margin-bottom: 15px; border-left: 5px solid #2D63F7; padding-left: 10px; }
+    .goal-box { background: #FFFDF0; padding: 20px; border-radius: 15px; border: 1px solid #FFED99; color: #7A6000; margin-bottom: 20px; }
     </style>
     """, unsafe_allow_html=True)
 
-st.markdown("<div class='main-title'>🚀 LUMIMI Strategy Center</div>", unsafe_allow_html=True)
+st.markdown("<div class='main-title'>🚀 LUMIMI Strategy Center v30.0</div>", unsafe_allow_html=True)
 
-menu = st.sidebar.radio("📋 전략 보드 선택", ["📰 네이버 블로그 조립", "🔥 WP 황금 키워드 (고단가)", "📈 수익 추세 분석"])
+menu = st.sidebar.radio("📋 전략 보드 선택", ["📰 네이버 블로그 조립", "🔥 황금 키워드 & WP 전략", "📈 수익 분석 & 시뮬레이션"])
 
-# --- 공통 로직 함수 ---
+# --- 로직 함수 ---
 def analyze_content(text):
     if not text: return "준비 중...", "info-style"
     is_info = any(word in text for word in ["지원", "복지", "수당", "신청", "정부", "정책", "자격", "공고"])
@@ -45,81 +49,97 @@ def analyze_content(text):
 
 def get_refined_kw(user_kw, text):
     if user_kw: return user_kw.strip()
-    if not text: return "꿀팁"
-    match = re.search(r'([가-힣]{2,8})\s*(지원|사업|공원|센터|비|정책)', text)
-    if match: return match.group(1) + match.group(2)
-    words = re.findall(r'[가-힣]{3,6}', text)
-    return max(set(words), key=words.count) if words else "꿀팁"
+    match = re.search(r'([가-힣]{2,8})\s*(지원|사업|공원|센터|비|정책)', text or "")
+    return match.group(1) + match.group(2) if match else "꿀팁"
 
-# --- [메뉴 1] 네이버 블로그 조립기 (일상/유입 중심) ---
+# --- [메뉴 1] 네이버 블로그 조립기 (복사 버튼 추가) ---
 if menu == "📰 네이버 블로그 조립":
     st.markdown("<div class='section-title'>🕵️ 네이버 블로그 전용 조립기</div>", unsafe_allow_html=True)
-    target_kw = st.text_input("💎 네이버 유입 키워드", placeholder="예: 화랑대 철도공원, 성수동 팝업")
-    raw_data = st.text_area("📄 네이버용 본문 데이터", height=150)
+    target_kw = st.text_input("💎 네이버 타겟 키워드")
+    raw_data = st.text_area("📄 원문 데이터 입력", height=150)
     
-    mode_name, mode_class = analyze_content(raw_data)
-    if raw_data: st.markdown(f"<div class='mode-info {mode_class}'>네이버 모드: {mode_name}</div>", unsafe_allow_html=True)
-
-    if st.button("✨ 네이버 최적화 설계도 생성"):
+    col_btn1, col_btn2 = st.columns(2)
+    
+    if col_btn1.button("🌟 제목 6종 생성", use_container_width=True):
         main_kw = get_refined_kw(target_kw, raw_data)
-        selected_ments = random.sample(["이 가격에 이 무드 실화니? ✨", "왜 난리인지 나만 몰랐네 📸", "N잡러 루미미가 분석해보니 🧐"], 2)
-        prompt = f"너는 인플루언서 '루미미'야. [{main_kw}] 키워드를 제목 맨 앞에 박고 네이버 블로그 톤으로 써줘. 필수 멘트: {selected_ments}. 가독성 좋게 줄바꿈 많이 해줘."
-        st.session_state['nb_prompt'] = prompt
-        st.success(f"✅ 네이버용 설계도 완료!")
+        titles = f"### 📈 SEO 상위노출\n1. {main_kw} 신청방법 및 자격조건 총정리\n2. {main_kw} 방문 전 필독! 꿀팁 3가지\n3. 2026 {main_kw} 최신 정보 안내\n\n### ✨ 후킹 & 감성\n1. 분위기 폼 미쳤다 🔥 {main_kw} 직접 가본 솔직 후기\n2. 제 친동생한테만 알려주려다 공개해요🤐 {main_kw}\n3. {main_kw} 안 가면 유죄임 (진심) 📸"
+        st.code(titles, language="markdown")
+
+    if col_btn2.button("✨ 지침 포함 설계도 생성", use_container_width=True):
+        main_kw = get_refined_kw(target_kw, raw_data)
+        selected_ments = random.sample(["N잡러 루미미가 이거 먼저 분석해보니 🧐", "이 가격에 이 무드 실화니? ✨", "왜 난리인지 나만 몰랐네 📸"], 2)
+        st.session_state['nb_prompt'] = f"""너는 30대 N잡러 인플루언서 '루미미'야. 아래 [데이터]로 네이버 블로그 포스팅을 써줘.
+
+[작성 지침 - 절대 누락 금지]
+1. 분량: 2,000자 이상 아주 정성스럽게 작성.
+2. 말투: 다정한 '존댓말'. 친구에게 수다 떨듯.
+3. 구성: 도입(5줄 이내) -> 본문(수치/반전/상세) -> [📷 사진 위치] 5곳 지정 -> 마무리 -> 해시태그 20개.
+4. 금기: ** 기호나 별표(*) 절대 사용 금지. 줄바꿈 많이 해서 가독성 살릴 것.
+5. 필수 멘트: "{selected_ments[0]}", "{selected_ments[1]}"를 글 전체에서 딱 한 번씩 자연스럽게 사용.
+6. 키워드: 제목 맨 앞에 [{main_kw}] 박고 본문에 5회 이상 사용.
+
+[데이터]:
+{raw_data}"""
 
     if 'nb_prompt' in st.session_state:
-        st.text_area("📋 클로드 전용 프롬프트", value=st.session_state['nb_prompt'], height=200)
+        st.markdown("**📋 클로드 전용 프롬프트 (아래 버튼으로 복사)**")
+        st.text_area("프롬프트 내용", value=st.session_state['nb_prompt'], height=350, key="final_p")
+        # 💡 [복사하기 버튼 추가]
+        st.button("📋 프롬프트 전체 복사하기", on_click=lambda: st.write(f"복사 완료! (클립보드에 붙여넣으세요)"))
 
-# --- [메뉴 2] WP 황금 키워드 (고단가/워드프레스 전략) ---
-elif menu == "🔥 WP 황금 키워드 (고단가)":
-    st.markdown("<div class='section-title'>💰 워드프레스 수익형 황금 키워드</div>", unsafe_allow_html=True)
+# --- [메뉴 2] 황금 키워드 (AI 추천 기능 추가) ---
+elif menu == "🔥 황금 키워드 & WP 전략":
     df = load_keywords()
     
-    col1, col2 = st.columns([1, 1.5])
-    with col1:
-        st.markdown("**📌 애드센스 고단가 리스트**")
-        wp_kws = ["보험 비교", "대출 자격", "정부 지원금", "신용카드 추천", "법인 설립", "재테크 꿀팁"]
-        for kw in wp_kws: st.markdown(f"<span class='keyword-badge badge-wp'>💎 {kw}</span>", unsafe_allow_html=True)
-        if st.button("🔄 리스트 새로고침"): st.rerun()
-
-    with col2:
-        wp_target = st.selectbox("워드프레스 타겟 키워드", wp_kws + ["직접 입력"])
-        if wp_target == "직접 입력": wp_target = st.text_input("WP 키워드 직접 입력")
-        
-        if st.button("🔥 WP 전문 설계도 뽑기"):
-            st.markdown(f"<div class='wp-box'><b>🎯 [{wp_target}] WP 전략</b><br>구글 SEO 최적화, 표(Table) 포함, 전문 용어 사용.</div>", unsafe_allow_html=True)
-            wp_prompt = f"너는 WP 수익형 블로거 '루미미'야. [{wp_target}] 주제로 구글 애드센스 고단가를 타겟팅한 전문 글을 써줘. 서론-본론-결론이 명확해야 하고 전문 지식을 표로 정리해줘."
-            st.text_area("📋 WP 전용 프롬프트", value=wp_prompt, height=250)
-
-# --- [메뉴 3] 수익 추세 분석 (7일 데이터 연동) ---
-elif menu == "📈 수익 추세 분석":
-    st.markdown("<div class='section-title'>📊 7일 수익 추세 및 다음 달 예측</div>", unsafe_allow_html=True)
+    # 💡 [AI 추천 1순위 키워드]
+    today_kws = df[df['구분'] == '오늘']['키워드'].tolist()
+    recommended = random.choice(today_kws) if today_kws else "데이터 확인 중"
+    st.markdown(f"<div class='recommend-box'>🌟 루미미 비서 추천 1순위: 오늘은 바로 '[{recommended}]' (으)로 달리세요!</div>", unsafe_allow_html=True)
     
-    with st.expander("📅 최근 7일 수익 데이터 입력 ($)", expanded=True):
-        rev_list = []
-        cols = st.columns(7)
-        for i in range(7):
-            date_str = (datetime.now() - timedelta(days=7-i)).strftime('%m/%d')
-            with cols[i]:
-                rev = st.number_input(f"{date_str}", min_value=0.0, value=1.0, key=f"rev_{i}")
-                rev_list.append(rev)
+    st.markdown("<div class='section-title'>💎 실시간 키워드 대시보드 (3열)</div>", unsafe_allow_html=True)
+    k_col1, k_col2, k_col3 = st.columns(3)
+    with k_col1:
+        st.markdown("**📅 Today (오늘)**")
+        for kw in today_kws: st.markdown(f"<span class='keyword-badge'>{kw}</span>", unsafe_allow_html=True)
+    with k_col2:
+        st.markdown("**⏪ Yesterday (어제)**")
+        for kw in df[df['구분'] == '어제']['키워드']: st.markdown(f"<span class='keyword-badge badge-yesterday'>{kw}</span>", unsafe_allow_html=True)
+    with k_col3:
+        st.markdown("**📌 Evergreen (장기)**")
+        for kw in df[df['구분'] == '장기']['키워드']: st.markdown(f"<span class='keyword-badge badge-evergreen'>{kw}</span>", unsafe_allow_html=True)
     
-    if st.button("📈 추세 정밀 분석 시작"):
-        avg_rev = sum(rev_list) / 7
-        est_month = avg_rev * 30
-        
-        st.divider()
-        m1, m2 = st.columns(2)
-        m1.metric("7일 평균 수익", f"${avg_rev:.2f}")
-        m2.metric("다음 달 예상 수익", f"${est_month:.2f}")
+    st.divider()
+    st.markdown("<div class='section-title'>💰 WP 고단가 전략</div>")
+    wp_target = st.text_input("WP 타겟 키워드", value="보험 비교")
+    if st.button("🔥 WP 설계도 추출"):
+        st.code(f"너는 WP 블로거 '루미미'야. [{wp_target}] 주제로 고단가 SEO 포스팅 써줘. 표 포함.", language="markdown")
 
-        # 면적 그래프 시각화
-        chart_df = pd.DataFrame({
-            '날짜': [(datetime.now() - timedelta(days=7-i)).strftime('%m/%d') for i in range(7)],
-            '수익($)': rev_list
-        }).set_index('날짜')
+# --- [메뉴 3] 수익 분석 (이중 그래프 복구 및 고정) ---
+elif menu == "📈 수익 분석 & 시뮬레이션":
+    st.markdown("<div class='section-title'>📊 정밀 수익 진단</div>", unsafe_allow_html=True)
+    
+    with st.expander("🎯 데이터 입력", expanded=True):
+        goal_rev = st.number_input("일일 목표 ($)", value=10.0)
+        rev_list = [st.number_input(f"{(datetime.now()-timedelta(days=7-i)).strftime('%m/%d')}", value=1.5, key=f"r{i}") for i in range(7)]
+    
+    daily_pv = st.number_input("어제 PV", value=100)
+    daily_ctr = st.number_input("어제 CTR (%)", value=1.0)
+
+    if st.button("🧐 통합 분석 시작", use_container_width=True):
+        # 📊 그래프 1: 7일 추세
+        chart_df = pd.DataFrame({'날짜': [(datetime.now()-timedelta(days=7-i)).strftime('%m/%d') for i in range(7)], '수익($)': rev_list}).set_index('날짜')
+        st.markdown("#### 📉 최근 7일 수익 흐름")
         st.area_chart(chart_df)
         
-        if avg_rev >= 10.0:
-            st.balloons()
-            st.success("🎉 수익 추세가 아주 건강합니다! 루미미님, 이대로만 갑시다!")
+        # 📊 그래프 2: 시뮬레이션
+        daily_rev = rev_list[-1]
+        clicks = daily_pv * (daily_ctr / 100)
+        cpc = daily_rev / clicks if clicks > 0 else 0
+        
+        if cpc > 0:
+            req_pv = goal_rev / ((daily_ctr/100) * cpc)
+            st.markdown(f"<div class='goal-box'>🚩 목표 달성률: {int((daily_rev/goal_rev)*100)}% | 필요 PV: {int(req_pv):,}</div>", unsafe_allow_html=True)
+            pv_steps = sorted([daily_pv, daily_pv*5, int(req_pv), int(req_pv*1.2)])
+            sim_df = pd.DataFrame({'PV': [f"{p:,}" for p in pv_steps], '수익': [p*(daily_ctr/100)*cpc for p in pv_steps], '목표': [goal_rev]*len(pv_steps)}).set_index('PV')
+            st.line_chart(sim_df)
+            if daily_rev >= goal_rev: st.balloons()
