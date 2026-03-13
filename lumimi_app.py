@@ -1,92 +1,86 @@
 
 import streamlit as st
 import pandas as pd
+import random  # 랜덤 기능을 위해 이 줄이 상단에 꼭 있어야 해요!
 
-# 1. 구글 시트 연결 설정
-SHEET_ID = "1zaERVga9_efXnpNL1mmXNdOrJ3syRctLt6hmeJjVgN8"
-SHEET_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv"
+# ... (기본 설정 및 CSS 생략: 기존 코드 유지) ...
 
-def load_keywords():
-    try:
-        df = pd.read_csv(SHEET_URL)
-        df['구분'] = df['구분'].astype(str).str.strip()
-        df['키워드'] = df['키워드'].astype(str).str.strip()
-        return df
-    except:
-        return pd.DataFrame({'구분': [], '키워드': []})
-
-# 페이지 설정
-st.set_page_config(page_title="루미미 전략 센터 v14.2", layout="wide")
-
-# CSS 스타일
-st.markdown("""
-    <style>
-    .keyword-badge {
-        background-color: #E1E9FF; color: #2D63F7; padding: 6px 14px;
-        border-radius: 15px; font-weight: bold; margin-right: 10px;
-        display: inline-block; margin-bottom: 12px; border: 1px solid #D0DFFF; font-size: 14px;
-    }
-    .badge-yesterday { background-color: #F0F2F6; color: #555; }
-    .badge-evergreen { background-color: #FFF0F0; color: #FF4B4B; }
-    .main-title { font-size: 35px; font-weight: 900; color: #1E1E1E; }
-    .section-title { font-size: 20px; font-weight: bold; margin-top: 25px; margin-bottom: 15px; }
-    </style>
-    """, unsafe_allow_html=True)
-
-st.markdown("<div class='main-title'>🚀 루미미 AI 콘텐츠 전략 센터 v14.2</div>", unsafe_allow_html=True)
-
-# 메뉴 구성
-menu = st.sidebar.radio("메뉴 선택", ["📰 블로그 완제품 조립", "🔥 오늘의 황금 키워드", "📈 수익 분석 및 전략"])
-
-# --- 📰 탭 1: 블로그 완제품 조립 (강력한 프롬프트 엔진 복구!) ---
+# --- 📰 탭 1: 네이버 블로그 완제품 조립 (20종 화법 랜덤 엔진) ---
 if menu == "📰 블로그 완제품 조립":
     st.subheader("🕵️ 네이버 블로그 포스팅 완제품 조립기")
     raw_data = st.text_area("분석할 기사 본문이나 제품 상세 정보", height=250, placeholder="여기에 내용을 넣어주세요!")
     
+    # 루미미 전용 화법 20종 데이터베이스
+    vibe_db = [
+        "공감형: '저도 해보니 헷갈려서 정리해요'",
+        "팩트형: '서울 월세 80만 원 시대, 통계 보고 손이 떨리더라고요'",
+        "질문형: '혹시 나만 빼고 다 받는 혜택, 놓치고 계신 건 아닐까요?'",
+        "시간 절약형: '10분 분량의 정책 자료를 1분 컷으로 요약했어요'",
+        "결론 선포형: '오늘 이 글 하나로 모든 고민은 끝내 드릴게요'",
+        "반전/감탄형: '이 가격에 이 무드 실화니?'",
+        "비밀 공유형: '이건 사실 아는 사람들만 조용히 챙겨가는 꿀팁인데요'",
+        "뒤늦은 깨달음: '왜 난리인지 나만 몰랐네'",
+        "단계별 가이드: '첫 단추만 잘 끼우면 그다음부턴 알아서 굴러가요'",
+        "비교 우위형: '다른 정책이랑 비교해 보니, 이게 압승이더라고요'",
+        "품절/트렌드형: '품절 난 이 혜택 니네 알아?'",
+        "전문가 권위형: 'N잡러 루미미가 이거 먼저 분석해보니'",
+        "감성 힐링형: '슬픈 하루였는데 내 마음을 풀어주네'",
+        "솔직 고백형: '솔직히 저도 처음엔 광고인 줄 알고 의심했거든요?'",
+        "지인 추천형: '제 친동생에게만 몰래 알려주고 싶은 소식이에요'",
+        "자신감 회복형: '지금 시작해도 늦지 않아요. 루미미가 응원할게요!'",
+        "마감 임박형: '신청 기간 얼마 안 남았어요. 지금 안 누르면 다음은 없어요!'",
+        "가치 강조형: '환경도 지키고 지갑도 지키는 이 선택, 안 할 이유가 없죠?'",
+        "질문형 여운: '여러분이 생각하는 가장 매력적인 혜택은 무엇인가요?'",
+        "액션 플랜형: '자, 이제 스마트폰 켜고 가입부터 하러 가볼까요?'"
+    ]
+
     col_btn1, col_btn2 = st.columns(2)
     
-    # 제목 생성 (루미미 화법 5종)
+    # 1. 제목 생성 (랜덤성 부여)
     if col_btn1.button("🌟 클릭 유도형 제목 5종 뽑기", use_container_width=True):
         if raw_data:
             titles = """
-1. [공감형] "서울 월세 80만원?" 저도 찾아보고 깜짝 놀라 정리한 핵심혜택 💙
-2. [반전형] 이 가격에 이 무드 실화니? '더드림집+' 모르면 무조건 손해예요!
-3. [호기심] 왜 난리인지 나만 몰랐네! 오늘 소식 속 숨은 꿀팁 3가지 ✨
-4. [전문가] N잡러 루미미가 분석한 팩트체크! 상세 조건까지 완벽 가이드
-5. [힐링형] 마음이 든든해지는 주거 소식, 우리 함께 따뜻한 혜택 나눠요.
+1. [공감] 나만 모르면 손해? 직접 분석한 핵심 혜택 💙
+2. [반전] 이 가격 실화니? 혜택 뜯어보고 깜짝 놀랐어요
+3. [꿀팁] 친동생에게만 알려주려다 공개하는 찐 정보
+4. [팩트] 통계로 본 현실, 해결책은 바로 이것!
+5. [응원] 지금도 안 늦었어요! 루미미와 함께 시작해요
             """
             st.code(titles, language="markdown")
 
-    # 설계도 생성 (루미미 전용 화법 가이드 포함)
-    if col_btn2.button("✨ 클로드 전용 2,000자 설계도 뽑기", use_container_width=True):
+    # 2. 설계도 생성 (20종 중 3개 랜덤 조합)
+    if col_btn2.button("✨ 루미미 화법 20종 랜덤 설계도 뽑기", use_container_width=True):
         if raw_data:
-            # 루미미님의 5가지 화법 가이드를 프롬프트에 내장!
+            # 20개 중 오늘 사용할 3개 화법 무작위 추출
+            selected_vibes = random.sample(vibe_db, 3)
+            
             final_prompt = f"""너는 30대 N잡러 인플루언서 '루미미(lumimi)'야. 
 아래 [데이터]를 바탕으로 네이버 블로그 포스팅을 "한 번에" 작성해줘. 
 
-[루미미 전용 화법 가이드]
-1. 가격 & 분위기 반전형: "이 가격에 이 무드 실화니?"
-2. 품절 대란 & 트렌드 유도형: "품절 난 이 제품 니네 알아?"
-3. 뒤늦은 깨달음 & 호기심 자극형: "왜 난리인지 나만 몰랐네"
-4. 감성 공감 & 힐링형: "슬픈 하루였는데 내 마음을 풀어주네"
-5. 전문가 권위 활용형: "N잡러 루미미가 이거 먼저 분석해보니"
+[오늘의 루미미 필수 화법 조합]
+- 화법 1: {selected_vibes[0]}
+- 화법 2: {selected_vibes[1]}
+- 화법 3: {selected_vibes[2]}
 
 [작성 지침]
 1. 분량: 2,000자 이상 아주 아주 길고 정성스럽게 작성할 것. 
 2. 말투: 다정한 '존댓말' 사용. 친구에게 수다 떨듯 친근하게 재구성해줘.
-3. 구성: 도입(공감) -> 상세정보(수치 위주) -> [📷 사진 위치] 5곳 지정 -> 마무리 -> 해시태그 20개.
-4. 금기사항: ** 기호나 별표(*)는 절대 쓰지 마. 오직 텍스트로만 가독성 좋게 줄바꿈 많이 해줘.
+3. 구성: 도입부에서 첫 번째 화법을 사용하고, 본문과 결론에 나머지 화법을 자연스럽게 녹여줘.
+4. 사진: 글 중간에 [📷 사진 위치]를 총 5곳 지정해줘.
+5. 금기사항: ** 기호나 별표(*)는 절대 쓰지 마. 오직 텍스트로만 가독성 좋게 줄바꿈 많이 해줘.
+6. 마무리: 마지막엔 해시태그 20개를 달아줘.
 
 [데이터]:
 {raw_data}
             """
             st.session_state['prompt_result'] = final_prompt
-            st.success("✅ 루미미 화법이 장착된 설계도 완성!")
+            st.session_state['current_vibes'] = selected_vibes
+            st.success("✅ 새로운 화법 조합으로 설계도가 준비됐어요!")
 
     if 'prompt_result' in st.session_state:
+        st.markdown(f"**💡 적용된 화법:** `{', '.join(st.session_state['current_vibes'])}`")
         st.text_area("클로드 전용 명령어", value=st.session_state['prompt_result'], height=450)
-        st.info("💡 위 텍스트를 복사해서 클로드에게 주면, 루미미 말투로 글을 써줄 거예요! 💙")
-
+        st.info("💡 위 명령어를 복사해서 클로드에게 주면 매번 다른 느낌으로 글을 써줍니다! 💙")
 # --- 나머지 탭은 기존 자동화 기능 유지 ---
 elif menu == "🔥 오늘의 황금 키워드":
     st.subheader("💎 구글 시트 실시간 연동 황금 키워드")
