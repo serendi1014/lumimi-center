@@ -44,16 +44,22 @@ if menu == "📰 블로그 완제품 조립":
 
     col_btn1, col_btn2 = st.columns(2)
     
-    # --- 1. MZ 제목 생성 ---
-    if col_btn1.button("🌟 [MZ감성] 제목 5종 생성", use_container_width=True):
+   # --- 1. [v16.7] 더블 타겟 제목 생성 (SEO vs 후킹) ---
+    if col_btn1.button("🌟 [전략적] 제목 6종 생성", use_container_width=True):
         if raw_data:
+            # 키워드 추출
             keyword = raw_data[:10].replace(" ", "").strip()
+            
             titles = f"""
-1. [역대급] "{keyword}" 안 가면 이번 봄 손해임.. 🔥 분위기 폼 미쳤다 (진심) 🌿
-2. [OOTD] 감성 수치 200%! "{keyword}" 사진 맛집인 거 왜 나만 몰랐음? 📸✨
-3. [현생탈출] "{keyword}" 나만 알고 싶은 비밀 장소인데.. 특별히 공개함! 🤐💙
-4. [갓생] N잡러 루미미가 분석한 "{keyword}" 팩트체크! 이건 못 참지 🧐🔥
-5. [힐링] 오늘 하루 갓벽하게! "{keyword}"에서 힐링하고 온 찐 후기 (광고아님) ☁️✨
+### 📈 [SEO 상위노출형] - 검색 유입 타겟
+1. {keyword} 가는법 예약 주차 및 봄나들이 명소 총정리 (2026 최신)
+2. 서울 아이와 가볼만한곳 {keyword} 체험 및 레스토랑 이용 꿀팁
+3. {keyword} 방문 전 필수 체크리스트! 입장료부터 주변 맛집까지
+
+### 🔥 [홈판/피드 후킹형] - 클릭 유도 타겟
+1. 와.. 서울에 이런 곳이 있었다고? "{keyword}" 분위기 폼 미쳤다.. 🔥
+2. 제 친동생한테만 알려주려다 공개함🤐 "{keyword}" 안 가면 유죄임 (진심)
+3. 갓생 살기 딱 좋은 "{keyword}" 무드 실화냐? 📸✨ (광고아님)
             """
             st.code(titles, language="markdown")
 
