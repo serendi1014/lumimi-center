@@ -16,78 +16,89 @@ def load_keywords():
     except:
         return pd.DataFrame({'구분': [], '키워드': []})
 
-# 페이지 설정
-st.set_page_config(page_title="루미미 전략 센터 v15.0", layout="wide")
+st.set_page_config(page_title="루미미 전략 센터 v16.5", layout="wide")
 
-# CSS 스타일
 st.markdown("""
     <style>
-    .keyword-badge {
-        background-color: #E1E9FF; color: #2D63F7; padding: 6px 14px;
-        border-radius: 15px; font-weight: bold; margin-right: 10px;
-        display: inline-block; margin-bottom: 12px; border: 1px solid #D0DFFF; font-size: 14px;
-    }
-    .badge-yesterday { background-color: #F0F2F6; color: #555; }
+    .keyword-badge { background-color: #E1E9FF; color: #2D63F7; padding: 6px 14px; border-radius: 15px; font-weight: bold; margin-right: 10px; display: inline-block; margin-bottom: 12px; border: 1px solid #D0DFFF; font-size: 14px; }
     .badge-evergreen { background-color: #FFF0F0; color: #FF4B4B; }
     .main-title { font-size: 35px; font-weight: 900; color: #1E1E1E; }
-    .section-title { font-size: 20px; font-weight: bold; margin-top: 25px; margin-bottom: 15px; }
+    .sub-info { background-color: #F8F9FA; padding: 15px; border-radius: 10px; border-left: 5px solid #2D63F7; margin-bottom: 20px; }
     </style>
     """, unsafe_allow_html=True)
 
-st.markdown("<div class='main-title'>🚀 루미미 AI 콘텐츠 전략 센터 v15.0</div>", unsafe_allow_html=True)
+st.markdown("<div class='main-title'>🚀 루미미 AI 전략 센터 v16.5</div>", unsafe_allow_html=True)
 
-# 메뉴 정의
 menu = st.sidebar.radio("메뉴 선택", ["📰 블로그 완제품 조립", "🔥 오늘의 황금 키워드", "📈 수익 분석 및 전략"])
 
-# --- 📰 탭 1: 블로그 완제품 조립 (화법 20종 랜덤 엔진) ---
 if menu == "📰 블로그 완제품 조립":
-    st.subheader("🕵️ 네이버 블로그 포스팅 완제품 조립기")
-    raw_data = st.text_area("분석할 기사 본문이나 제품 상세 정보", height=250, placeholder="여기에 내용을 넣어주세요!")
+    st.subheader("🕵️ 네이버 블로그 MZ 스마트 조립기")
+    raw_data = st.text_area("기사 본문이나 상세 정보 입력", height=200, placeholder="여기에 내용을 넣어주세요!")
     
-    vibe_db = [
-        "공감형: '저도 해보니 헷갈려서 정리해요'", "팩트형: '서울 월세 80만 원 시대, 통계 보고 손이 떨리더라고요'",
-        "질문형: '혹시 나만 빼고 다 받는 혜택, 놓치고 계신 건 아닐까요?'", "시간 절약형: '10분 분량의 정책 자료를 1분 컷으로 요약했어요'",
-        "결론 선포형: '오늘 이 글 하나로 모든 고민은 끝내 드릴게요'", "반전/감탄형: '이 가격에 이 무드 실화니?'",
-        "비밀 공유형: '이건 사실 아는 사람들만 조용히 챙겨가는 꿀팁인데요'", "뒤늦은 깨달음: '왜 난리인지 나만 몰랐네'",
-        "단계별 가이드: '첫 단추만 잘 끼우면 그다음부턴 알아서 굴러가요'", "비교 우위형: '다른 정책이랑 비교해 보니, 이게 압승이더라고요'",
-        "품절/트렌드형: '품절 난 이 혜택 니네 알아?'", "전문가 권위형: 'N잡러 루미미가 이거 먼저 분석해보니'",
-        "감성 힐링형: '슬픈 하루였는데 내 마음을 풀어주네'", "솔직 고백형: '솔직히 저도 처음엔 광고인 줄 알고 의심했거든요?'",
-        "지인 추천형: '제 친동생에게만 몰래 알려주고 싶은 소식이에요'", "자신감 회복형: '지금 시작해도 늦지 않아요. 루미미가 응원할게요!'",
-        "마감 임박형: '신청 기간 얼마 안 남았어요. 지금 안 누르면 다음은 없어요!'", "가치 강조형: '환경도 지키고 지갑도 지키는 이 선택, 안 할 이유가 없죠?'",
-        "질문형 여운: '여러분이 생각하는 가장 매력적인 혜택은 무엇인가요?'", "액션 플랜형: '자, 이제 스마트폰 켜고 가입부터 하러 가볼까요?'"
+    # 힙한 멘트 데이터베이스
+    mz_ment_db = [
+        "진심 폼 미쳤다..", "이거 안 가면 유죄임 (진지)", "완전 갓벽 그 자체 ✨", "비주얼 무엇? 실물 깡패임", 
+        "현생 탈출 지대로 하고 옴 ☁️", "진짜 나만 알고 싶었는데.. 특별히 공개!", "이 분위기 어쩔 거야.. 감성 터짐 🔥",
+        "여기 완전 사진 맛집인 거 다들 알지?", "진심 내돈내산 찐 후기임!", "이거 모르면 진짜 손해라구 🤐"
     ]
 
     col_btn1, col_btn2 = st.columns(2)
-    if col_btn1.button("🌟 클릭 유도형 제목 5종 뽑기", use_container_width=True):
+    
+    # --- 1. MZ 제목 생성 ---
+    if col_btn1.button("🌟 [MZ감성] 제목 5종 생성", use_container_width=True):
         if raw_data:
-            st.code("1. [공감] 나만 모르면 손해? 직접 분석한 핵심 혜택 💙\n2. [반전] 이 가격 실화니? 혜택 뜯어보고 깜짝 놀랐어요\n3. [꿀팁] 친동생에게만 알려주려다 공개하는 찐 정보\n4. [팩트] 통계로 본 현실, 해결책은 바로 이것!\n5. [응원] 지금도 안 늦었어요! 루미미와 함께 시작해요")
+            keyword = raw_data[:10].replace(" ", "").strip()
+            titles = f"""
+1. [역대급] "{keyword}" 안 가면 이번 봄 손해임.. 🔥 분위기 폼 미쳤다 (진심) 🌿
+2. [OOTD] 감성 수치 200%! "{keyword}" 사진 맛집인 거 왜 나만 몰랐음? 📸✨
+3. [현생탈출] "{keyword}" 나만 알고 싶은 비밀 장소인데.. 특별히 공개함! 🤐💙
+4. [갓생] N잡러 루미미가 분석한 "{keyword}" 팩트체크! 이건 못 참지 🧐🔥
+5. [힐링] 오늘 하루 갓벽하게! "{keyword}"에서 힐링하고 온 찐 후기 (광고아님) ☁️✨
+            """
+            st.code(titles, language="markdown")
 
-    if col_btn2.button("✨ 루미미 화법 20종 랜덤 설계도 뽑기", use_container_width=True):
+    # --- 2. 스마트 랜덤 설계도 & 힙한 멘트 추천 ---
+    if col_btn2.button("✨ [MZ특화] 랜덤 설계도 뽑기", use_container_width=True):
         if raw_data:
+            # 주제 감지 (나들이 vs 정보)
+            is_place = any(word in raw_data for word in ["공원", "역", "여행", "카페", "나들이", "기차"])
+            
+            # 화법 선택
+            vibe_db = ["공감형", "팩트형", "반전/감탄형", "비밀 공유형", "뒤늦은 깨달음", "지인 추천형", "감성 힐링형"]
             selected_vibes = random.sample(vibe_db, 3)
-            final_prompt = f"""너는 30대 N잡러 인플루언서 '루미미(lumimi)'야. 아래 [데이터]를 바탕으로 네이버 블로그 포스팅을 작성해줘.
+            # 힙한 멘트 3개 추천
+            selected_mz_ments = random.sample(mz_ment_db, 3)
+            
+            final_prompt = f"""너는 30대 N잡러 인플루언서 '루미미'야. 
+[데이터]를 분석해서 네이버 블로그 글을 써줘. 
 
-[필수 화법 조합]
-1. {selected_vibes[0]}
-2. {selected_vibes[1]}
-3. {selected_vibes[2]}
+[오늘의 루미미 Vibe 조합]
+- 화법: {', '.join(selected_vibes)}
+- 힙한 멘트 (본문에 자연스럽게 섞어줘): 
+  1. "{selected_mz_ments[0]}"
+  2. "{selected_mz_ments[1]}"
+  3. "{selected_mz_ments[2]}"
 
 [작성 지침]
-1. 분량: 2,000자 이상 아주 정성스럽게 작성.
-2. 말투: 다정한 '존댓말'. 친구에게 수다 떨듯 작성.
-3. 구성: 도입(공감/팩트) -> 본문(상세 수치 및 반전) -> [📷 사진 위치] 5곳 지정 -> 마무리 -> 해시태그 20개.
-4. 금기: ** 기호나 별표(*) 금지. 오직 텍스트로만 가독성 좋게 줄바꿈 많이.
-5. 지침: 각 화법은 글 전체에서 '딱 한 번씩만' 자연스럽게 사용하고, 도입부는 5줄 이내로 핵심을 찔러줘. 지루하지 않게 해줘."
+- 도입부는 5줄 이내로 임팩트 있게 시작할 것.
+- 추천된 힙한 멘트들을 문맥에 맞게 한 번씩 툭툭 던지듯 넣어줘. (MZ느낌 뿜뿜!)
+- 기사 내용의 핵심 팩트는 놓치지 말고 포함할 것.
+- 사진 위치 5곳 지정, ** 기호 절대 금지, 해시태그 20개.
 
-[데이터]:
-{raw_data}"""
+[데이터]: {raw_data}"""
             st.session_state['prompt_result'] = final_prompt
             st.session_state['current_vibes'] = selected_vibes
-            st.success("✅ 새로운 화법 조합 설계도 준비 완료!")
+            st.session_state['current_mz'] = selected_mz_ments
+            st.success("✅ MZ 감성 듬뿍 담긴 설계도 완성!")
 
     if 'prompt_result' in st.session_state:
-        st.markdown(f"**💡 적용된 화법:** `{', '.join(st.session_state['current_vibes'])}`")
-        st.text_area("클로드 전용 명령어", value=st.session_state['prompt_result'], height=450)
+        st.markdown(f"""
+        <div class='sub-info'>
+        <b>💡 오늘의 화법:</b> {', '.join(st.session_state['current_vibes'])}<br>
+        <b>🔥 추천 MZ 멘트:</b> {', '.join(st.session_state['current_mz'])}
+        </div>
+        """, unsafe_allow_html=True)
+        st.text_area("클로드 전용 명령어", value=st.session_state['prompt_result'], height=400)
 
 # --- 🔥 탭 2: 황금 키워드 ---
 elif menu == "🔥 오늘의 황금 키워드":
