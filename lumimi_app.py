@@ -103,13 +103,6 @@ if menu == "📰 1. 네이버 블로그 전략 (제목 6종)":
     if 'p_v48' in st.session_state:
         st.text_area("📋 클로드용 마스터 프롬프트 (전체 복사)", value=st.session_state['p_v48'], height=450)
 
-# --- 나머지 메뉴 (생략 없이 통합) ---
-elif menu == "💸 2. 네이버 애드포스트 & 쇼핑커넥트":
-    st.subheader("💰 네이버 전용 수익화 로드맵")
-    pv = st.number_input("일일 방문자 (PV)", value=100)
-    if st.button("🧐 단계별 진단", use_container_width=True):
-        if pv < 500: st.error("❌ 지금은 조회수가 시급합니다. 3번 탭의 키워드로 유입부터 늘리세요!")
-        else: st.success("✅ 쇼핑커넥트 제휴 링크를 삽입하여 추가 수익을 창출하세요.")
 
 # --- [메뉴 2] 네이버 수익 (솔루션 구체화) ---
 elif menu == "💸 2. 네이버 애드포스트 & 쇼핑커넥트":
